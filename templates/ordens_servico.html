@@ -4,13 +4,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Ordens de Serviço | OficinaPro</title>
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
 </head>
 
 <body>
 
+    <!-- MENU LATERAL -->
     <aside class="sidebar">
         <h1>OficinaPro</h1>
         <p class="subtitulo">Sistema de gerenciamento</p>
@@ -19,10 +24,13 @@
             <a href="{{ url_for('inicio') }}">Dashboard</a>
             <a href="{{ url_for('inicio') }}#clientes">Clientes</a>
             <a href="{{ url_for('listar_veiculos') }}">Veículos</a>
-            <a href="{{ url_for('listar_ordens') }}" class="ativo">Ordens de serviço</a>
+            <a href="{{ url_for('listar_ordens') }}" class="ativo">
+                Ordens de serviço
+            </a>
         </nav>
     </aside>
 
+    <!-- CONTEÚDO PRINCIPAL -->
     <main class="conteudo">
 
         <header class="cabecalho">
@@ -32,6 +40,7 @@
             </div>
         </header>
 
+        <!-- MENSAGENS DO SISTEMA -->
         {% with mensagens = get_flashed_messages(with_categories=true) %}
             {% if mensagens %}
                 {% for categoria, mensagem in mensagens %}
@@ -42,24 +51,34 @@
             {% endif %}
         {% endwith %}
 
-        <!-- Cadastro de ordem -->
+        <!-- CADASTRO DE ORDEM DE SERVIÇO -->
         <section class="painel" id="cadastro-ordem">
+
             <h2>Nova ordem de serviço</h2>
 
             {% if veiculos %}
-                <form action="{{ url_for('cadastrar_ordem') }}" method="POST">
+
+                <form
+                    action="{{ url_for('cadastrar_ordem') }}"
+                    method="POST"
+                >
 
                     <div class="formulario">
 
                         <div class="campo">
                             <label for="veiculo_id">Veículo</label>
 
-                            <select id="veiculo_id" name="veiculo_id" required>
+                            <select
+                                id="veiculo_id"
+                                name="veiculo_id"
+                                required
+                            >
                                 <option value="">Selecione um veículo</option>
 
                                 {% for veiculo in veiculos %}
                                     <option value="{{ veiculo.id }}">
-                                        {{ veiculo.marca }} {{ veiculo.modelo }}
+                                        {{ veiculo.marca }}
+                                        {{ veiculo.modelo }}
                                         — {{ veiculo.placa }}
                                     </option>
                                 {% endfor %}
@@ -67,7 +86,9 @@
                         </div>
 
                         <div class="campo">
-                            <label for="descricao">Descrição do serviço</label>
+                            <label for="descricao">
+                                Descrição do serviço
+                            </label>
 
                             <input
                                 type="text"
@@ -95,21 +116,34 @@
                     </div>
 
                     <div class="botoes">
-                        <button type="submit">Cadastrar ordem</button>
+                        <button type="submit">
+                            Cadastrar ordem
+                        </button>
                     </div>
 
                 </form>
-            {% else %}
-                <p>Nenhum veículo cadastrado. Cadastre um veículo antes de criar uma ordem de serviço.</p>
 
-                <a href="{{ url_for('listar_veiculos') }}" class="botao-principal">
+            {% else %}
+
+                <p>
+                    Nenhum veículo cadastrado. Cadastre um veículo
+                    antes de criar uma ordem de serviço.
+                </p>
+
+                <a
+                    href="{{ url_for('listar_veiculos') }}"
+                    class="botao-principal"
+                >
                     Cadastrar veículo
                 </a>
+
             {% endif %}
+
         </section>
 
-        <!-- Pesquisa e listagem -->
+        <!-- PESQUISA E FILTROS -->
         <section class="painel" id="lista-ordens">
+
             <h2>Ordens cadastradas</h2>
 
             <form
@@ -131,43 +165,61 @@
                 </div>
 
                 <div class="campo">
-                    <label for="status">Status</label>
+                    <label for="status">Filtrar por status</label>
 
                     <select id="status" name="status">
-                        <option value="">Todos os status</option>
 
-                        <option value="Pendente"
-                            {% if status_filtro == 'Pendente' %}selected{% endif %}>
+                        <option
+                            value=""
+                            {% if not status_filtro %}selected{% endif %}
+                        >
+                            Todos os status
+                        </option>
+
+                        <option
+                            value="Pendente"
+                            {% if status_filtro == 'Pendente' %}selected{% endif %}
+                        >
                             Pendente
                         </option>
 
-                        <option value="Em andamento"
-                            {% if status_filtro == 'Em andamento' %}selected{% endif %}>
+                        <option
+                            value="Em andamento"
+                            {% if status_filtro == 'Em andamento' %}selected{% endif %}
+                        >
                             Em andamento
                         </option>
 
-                        <option value="Concluída"
-                            {% if status_filtro == 'Concluída' %}selected{% endif %}>
+                        <option
+                            value="Concluída"
+                            {% if status_filtro == 'Concluída' %}selected{% endif %}
+                        >
                             Concluída
                         </option>
+
                     </select>
                 </div>
 
                 <div class="botoes">
                     <button type="submit">Pesquisar</button>
 
-                    <a href="{{ url_for('listar_ordens') }}#lista-ordens"
-                       class="botao-voltar">
+                    <a
+                        href="{{ url_for('listar_ordens') }}#lista-ordens"
+                        class="botao-voltar"
+                    >
                         Limpar
                     </a>
                 </div>
 
             </form>
 
+            <!-- TABELA DE ORDENS -->
             {% if ordens %}
 
                 <div class="tabela-container">
+
                     <table>
+
                         <thead>
                             <tr>
                                 <th>ID</th>
@@ -182,14 +234,22 @@
                         </thead>
 
                         <tbody>
+
                             {% for ordem in ordens %}
+
                                 <tr>
+
                                     <td>{{ ordem.id }}</td>
 
-                                    <td>{{ ordem.cliente }}</td>
+                                    <td>
+                                        {{ ordem.cliente }}
+                                    </td>
 
                                     <td>
-                                        <strong>{{ ordem.marca }} {{ ordem.modelo }}</strong>
+                                        <strong>
+                                            {{ ordem.marca }}
+                                            {{ ordem.modelo }}
+                                        </strong>
                                         <br>
                                         <small>{{ ordem.placa }}</small>
                                     </td>
@@ -208,67 +268,107 @@
                                         {% endif %}
                                     </td>
 
+                                    <!-- ATUALIZAÇÃO DO STATUS -->
                                     <td>
                                         <form
                                             class="status-form"
                                             action="{{ url_for('atualizar_status_ordem', id=ordem.id) }}"
                                             method="POST"
                                         >
+
                                             <select
                                                 class="status-select"
                                                 name="status"
                                                 aria-label="Status da ordem {{ ordem.id }}"
                                                 onchange="this.form.submit()"
                                             >
-                                                <option value="Pendente"
-                                                    {% if ordem.status == 'Pendente' %}selected{% endif %}>
+
+                                                <option
+                                                    value="Pendente"
+                                                    {% if ordem.status == 'Pendente' %}selected{% endif %}
+                                                >
                                                     Pendente
                                                 </option>
 
-                                                <option value="Em andamento"
-                                                    {% if ordem.status == 'Em andamento' %}selected{% endif %}>
+                                                <option
+                                                    value="Em andamento"
+                                                    {% if ordem.status == 'Em andamento' %}selected{% endif %}
+                                                >
                                                     Em andamento
                                                 </option>
 
-                                                <option value="Concluída"
-                                                    {% if ordem.status == 'Concluída' %}selected{% endif %}>
+                                                <option
+                                                    value="Concluída"
+                                                    {% if ordem.status == 'Concluída' %}selected{% endif %}
+                                                >
                                                     Concluída
                                                 </option>
+
                                             </select>
+
                                         </form>
                                     </td>
 
+                                    <!-- AÇÕES -->
                                     <td>
-                                        {% if ordem.status == 'Concluída' %}
-                                            <div class="acoes">
+                                        <div class="acoes">
+
+                                            <a
+                                                href="{{ url_for('detalhes_ordem', id=ordem.id) }}"
+                                                class="botao-editar"
+                                            >
+                                                Ver detalhes
+                                            </a>
+
+                                            {% if ordem.status == 'Concluída' %}
+
                                                 <form
                                                     action="{{ url_for('excluir_ordem', id=ordem.id) }}"
                                                     method="POST"
                                                     onsubmit="return confirm('Deseja realmente excluir esta ordem de serviço?');"
                                                 >
-                                                    <button type="submit" class="botao-excluir">
+
+                                                    <button
+                                                        type="submit"
+                                                        class="botao-excluir"
+                                                    >
                                                         Excluir
                                                     </button>
+
                                                 </form>
-                                            </div>
-                                        {% else %}
-                                            <span class="rotulo">Conclua para excluir</span>
+
+                                            {% endif %}
+
+                                        </div>
+
+                                        {% if ordem.status != 'Concluída' %}
+                                            <small class="rotulo">
+                                                Conclua para excluir
+                                            </small>
                                         {% endif %}
                                     </td>
+
                                 </tr>
+
                             {% endfor %}
+
                         </tbody>
+
                     </table>
+
                 </div>
 
             {% else %}
+
                 <div class="vazio">
                     Nenhuma ordem de serviço encontrada.
                 </div>
+
             {% endif %}
 
         </section>
 
+        <!-- RODAPÉ -->
         <footer class="rodape">
             OficinaPro — Sistema de gerenciamento de oficina
         </footer>

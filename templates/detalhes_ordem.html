@@ -1,0 +1,159 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Detalhes da Ordem #{{ ordem.id }} | OficinaPro</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <aside class="sidebar">
+        <h1>OficinaPro</h1>
+        <p class="subtitulo">Sistema de gerenciamento</p>
+
+        <nav>
+            <a href="{{ url_for('inicio') }}">Dashboard</a>
+            <a href="{{ url_for('inicio') }}#clientes">Clientes</a>
+            <a href="{{ url_for('listar_veiculos') }}">Veículos</a>
+            <a href="{{ url_for('listar_ordens') }}" class="ativo">Ordens de serviço</a>
+        </nav>
+    </aside>
+
+    <main class="conteudo">
+
+        <header class="cabecalho">
+            <div>
+                <h1>Detalhes da ordem #{{ ordem.id }}</h1>
+                <p>Informações completas do serviço.</p>
+            </div>
+
+            <a href="{{ url_for('listar_ordens') }}" class="botao-voltar">
+                Voltar às ordens
+            </a>
+        </header>
+
+        {% with mensagens = get_flashed_messages(with_categories=true) %}
+            {% if mensagens %}
+                {% for categoria, mensagem in mensagens %}
+                    <div class="mensagem {{ categoria }}">
+                        {{ mensagem }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Informações do serviço -->
+        <section class="painel">
+            <h2>Informações do serviço</h2>
+
+            <div class="formulario">
+
+                <div>
+                    <p class="rotulo">Número da ordem</p>
+                    <strong>#{{ ordem.id }}</strong>
+                </div>
+
+                <div>
+                    <p class="rotulo">Data de abertura</p>
+                    <strong>
+                        {% if ordem.data_abertura %}
+                            {{ ordem.data_abertura.strftime('%d/%m/%Y %H:%M') }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </strong>
+                </div>
+
+                <div>
+                    <p class="rotulo">Valor do serviço</p>
+                    <strong>
+                        R$ {{ "%.2f"|format(ordem.valor|float)|replace(".", ",") }}
+                    </strong>
+                </div>
+
+                <div>
+                    <p class="rotulo">Status atual</p>
+
+                    {% if ordem.status == 'Pendente' %}
+                        <span class="status status-pendente">Pendente</span>
+                    {% elif ordem.status == 'Em andamento' %}
+                        <span class="status status-andamento">Em andamento</span>
+                    {% else %}
+                        <span class="status status-concluida">Concluída</span>
+                    {% endif %}
+                </div>
+
+            </div>
+
+            <div style="margin-top: 24px;">
+                <p class="rotulo">Descrição do serviço</p>
+                <p>{{ ordem.descricao }}</p>
+            </div>
+        </section>
+
+        <!-- Informações do cliente -->
+        <section class="painel">
+            <h2>Dados do cliente</h2>
+
+            <div class="formulario">
+
+                <div>
+                    <p class="rotulo">Nome</p>
+                    <strong>{{ ordem.cliente }}</strong>
+                </div>
+
+                <div>
+                    <p class="rotulo">Telefone</p>
+                    <strong>{{ ordem.telefone or 'Não informado' }}</strong>
+                </div>
+
+                <div>
+                    <p class="rotulo">E-mail</p>
+                    <strong>{{ ordem.email or 'Não informado' }}</strong>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Informações do veículo -->
+        <section class="painel">
+            <h2>Dados do veículo</h2>
+
+            <div class="formulario">
+
+                <div>
+                    <p class="rotulo">Marca</p>
+                    <strong>{{ ordem.marca }}</strong>
+                </div>
+
+                <div>
+                    <p class="rotulo">Modelo</p>
+                    <strong>{{ ordem.modelo }}</strong>
+                </div>
+
+                <div>
+                    <p class="rotulo">Ano</p>
+                    <strong>{{ ordem.ano }}</strong>
+                </div>
+
+                <div>
+                    <p class="rotulo">Placa</p>
+                    <strong>{{ ordem.placa }}</strong>
+                </div>
+
+            </div>
+        </section>
+
+        <footer class="rodape">
+            OficinaPro — Sistema de gerenciamento de oficina
+        </footer>
+
+    </main>
+
+</body>
+</html>

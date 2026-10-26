@@ -655,3 +655,13 @@ tbody tr:hover {
         grid-template-columns: 1fr;
     }
 }
+
+/* Espaçamento entre as ações da ordem de serviço */
+.acoes {
+    margin-bottom: 8px;
+}
+
+.rotulo {
+    display: inline-block;
+    margin-top: 4px;
+}

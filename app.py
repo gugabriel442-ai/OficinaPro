@@ -534,6 +534,39 @@ def listar_ordens():
         status_filtro=status_filtro
     )
 
+@app.route("/ordens-servico/detalhes/<int:id>")
+def detalhes_ordem(id):
+    ordem = buscar_um(
+        """
+        SELECT
+            os.id,
+            os.descricao,
+            os.valor,
+            os.status,
+            os.data_abertura,
+            c.nome AS cliente,
+            c.telefone,
+            c.email,
+            v.marca,
+            v.modelo,
+            v.ano,
+            v.placa
+        FROM ordens_servico os
+        INNER JOIN veiculos v ON v.id = os.veiculo_id
+        INNER JOIN clientes c ON c.id = v.cliente_id
+        WHERE os.id = %s
+        """,
+        (id,)
+    )
+
+    if not ordem:
+        flash("Ordem de serviço não encontrada.", "erro")
+        return redirect(url_for("listar_ordens"))
+
+    return render_template(
+        "detalhes_ordem.html",
+        ordem=ordem
+    )
 
 @app.route("/ordens-servico/cadastrar", methods=["POST"])
 def cadastrar_ordem():
