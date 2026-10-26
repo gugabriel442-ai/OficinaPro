@@ -7,12 +7,11 @@ app = Flask(__name__)
 app.secret_key = "chave-temporaria-oficinapro"
 
 
-# ==================================================
-# FUNÇÕES AUXILIARES
-# ==================================================
+# =========================================================
+# FUNÇÕES AUXILIARES DO BANCO DE DADOS
+# =========================================================
 
 def buscar_um(sql, parametros=()):
-    """Executa uma consulta que retorna um único registro."""
     conexao = None
     cursor = None
 
@@ -21,9 +20,11 @@ def buscar_um(sql, parametros=()):
         cursor = conexao.cursor(dictionary=True)
         cursor.execute(sql, parametros)
         return cursor.fetchone()
+
     except Error as erro:
         print(f"Erro no banco de dados: {erro}")
         return None
+
     finally:
         if cursor:
             cursor.close()
@@ -32,7 +33,6 @@ def buscar_um(sql, parametros=()):
 
 
 def buscar_todos(sql, parametros=()):
-    """Executa uma consulta que retorna vários registros."""
     conexao = None
     cursor = None
 
@@ -41,9 +41,11 @@ def buscar_todos(sql, parametros=()):
         cursor = conexao.cursor(dictionary=True)
         cursor.execute(sql, parametros)
         return cursor.fetchall()
+
     except Error as erro:
         print(f"Erro no banco de dados: {erro}")
         return []
+
     finally:
         if cursor:
             cursor.close()
@@ -52,7 +54,6 @@ def buscar_todos(sql, parametros=()):
 
 
 def executar(sql, parametros=()):
-    """Executa INSERT, UPDATE ou DELETE."""
     conexao = None
     cursor = None
 
@@ -77,15 +78,12 @@ def executar(sql, parametros=()):
             conexao.close()
 
 
-# ==================================================
-# DASHBOARD
-# ==================================================
-
+# =========================================================
+# DASHBOARD E PESQUISA DE CLIENTES
+# =========================================================
 
 @app.route("/")
 def inicio():
-    pesquisa_cliente = request.args.get("pesquisa_cliente", "").strip()
-
     total_clientes = buscar_um(
         "SELECT COUNT(*) AS total FROM clientes"
     )
@@ -95,31 +93,46 @@ def inicio():
     )
 
     ordens_pendentes = buscar_um(
-        "SELECT COUNT(*) AS total FROM ordens_servico "
-        "WHERE status = %s",
-        ("Pendente",)
+        """
+        SELECT COUNT(*) AS total
+        FROM ordens_servico
+        WHERE status IN ('Pendente', 'Em andamento')
+        """
     )
 
     ordens_concluidas = buscar_um(
-        "SELECT COUNT(*) AS total FROM ordens_servico "
-        "WHERE status = %s",
-        ("Concluída",)
+        """
+        SELECT COUNT(*) AS total
+        FROM ordens_servico
+        WHERE status = 'Concluída'
+        """
     )
+
+    pesquisa_cliente = request.args.get(
+        "pesquisa_cliente", ""
+    ).strip()
 
     sql_clientes = """
         SELECT id, nome, telefone, email
         FROM clientes
-        WHERE nome LIKE %s
-           OR telefone LIKE %s
-           OR email LIKE %s
-        ORDER BY id DESC
     """
 
-    termo = f"%{pesquisa_cliente}%"
+    parametros = []
+
+    if pesquisa_cliente:
+        sql_clientes += """
+            WHERE nome LIKE %s
+               OR telefone LIKE %s
+               OR email LIKE %s
+        """
+
+        termo = f"%{pesquisa_cliente}%"
+        parametros = [termo, termo, termo]
+
+    sql_clientes += " ORDER BY id DESC"
 
     clientes = buscar_todos(
-        sql_clientes,
-        (termo, termo, termo)
+        sql_clientes, tuple(parametros)
     )
 
     return render_template(
@@ -132,9 +145,10 @@ def inicio():
         pesquisa_cliente=pesquisa_cliente
     )
 
-# ==================================================
+
+# =========================================================
 # CLIENTES
-# ==================================================
+# =========================================================
 
 @app.route("/clientes/cadastrar", methods=["POST"])
 def cadastrar_cliente():
@@ -143,15 +157,15 @@ def cadastrar_cliente():
     email = request.form.get("email", "").strip()
 
     if not nome:
-        flash("Informe o nome do cliente.", "erro")
-        return redirect(url_for("inicio") + "#clientes")
+        flash("O nome do cliente é obrigatório.", "erro")
+        return redirect(url_for("inicio") + "#cadastro-cliente")
 
     sucesso = executar(
         """
         INSERT INTO clientes (nome, telefone, email)
         VALUES (%s, %s, %s)
         """,
-        (nome, telefone or None, email or None)
+        (nome, telefone, email)
     )
 
     if sucesso:
@@ -164,6 +178,15 @@ def cadastrar_cliente():
 
 @app.route("/clientes/editar/<int:id>", methods=["GET", "POST"])
 def editar_cliente(id):
+    cliente = buscar_um(
+        "SELECT * FROM clientes WHERE id = %s",
+        (id,)
+    )
+
+    if not cliente:
+        flash("Cliente não encontrado.", "erro")
+        return redirect(url_for("inicio"))
+
     if request.method == "POST":
         nome = request.form.get("nome", "").strip()
         telefone = request.form.get("telefone", "").strip()
@@ -179,7 +202,7 @@ def editar_cliente(id):
             SET nome = %s, telefone = %s, email = %s
             WHERE id = %s
             """,
-            (nome, telefone or None, email or None, id)
+            (nome, telefone, email, id)
         )
 
         if sucesso:
@@ -187,23 +210,21 @@ def editar_cliente(id):
             return redirect(url_for("inicio") + "#clientes")
 
         flash("Não foi possível atualizar o cliente.", "erro")
-        return redirect(url_for("editar_cliente", id=id))
-
-    cliente = buscar_um(
-        "SELECT id, nome, telefone, email FROM clientes WHERE id = %s",
-        (id,)
-    )
-
-    if not cliente:
-        flash("Cliente não encontrado.", "aviso")
-        return redirect(url_for("inicio") + "#clientes")
 
     return render_template("editar_cliente.html", cliente=cliente)
 
 
 @app.route("/clientes/excluir/<int:id>", methods=["POST"])
 def excluir_cliente(id):
-    # Não exclui clientes que ainda possuem veículos vinculados.
+    cliente = buscar_um(
+        "SELECT id FROM clientes WHERE id = %s",
+        (id,)
+    )
+
+    if not cliente:
+        flash("Cliente não encontrado.", "erro")
+        return redirect(url_for("inicio") + "#clientes")
+
     veiculo = buscar_um(
         "SELECT id FROM veiculos WHERE cliente_id = %s LIMIT 1",
         (id,)
@@ -211,8 +232,8 @@ def excluir_cliente(id):
 
     if veiculo:
         flash(
-            "Não é possível excluir este cliente: existem veículos vinculados a ele.",
-            "aviso"
+            "Não é possível excluir este cliente porque ele possui veículos cadastrados.",
+            "erro"
         )
         return redirect(url_for("inicio") + "#clientes")
 
@@ -229,14 +250,15 @@ def excluir_cliente(id):
     return redirect(url_for("inicio") + "#clientes")
 
 
-# ==================================================
-# VEÍCULOS
-# ==================================================
+# =========================================================
+# VEÍCULOS E PESQUISA
+# =========================================================
 
 @app.route("/veiculos")
 def listar_veiculos():
-    veiculos = buscar_todos(
-        """
+    pesquisa = request.args.get("pesquisa", "").strip()
+
+    sql = """
         SELECT
             v.id,
             v.cliente_id,
@@ -247,9 +269,23 @@ def listar_veiculos():
             v.placa
         FROM veiculos v
         INNER JOIN clientes c ON c.id = v.cliente_id
-        ORDER BY v.id DESC
+    """
+
+    parametros = []
+
+    if pesquisa:
+        sql += """
+            WHERE v.placa LIKE %s
+               OR v.marca LIKE %s
+               OR v.modelo LIKE %s
         """
-    )
+
+        termo = f"%{pesquisa}%"
+        parametros = [termo, termo, termo]
+
+    sql += " ORDER BY v.id DESC"
+
+    veiculos = buscar_todos(sql, tuple(parametros))
 
     clientes = buscar_todos(
         "SELECT id, nome FROM clientes ORDER BY nome"
@@ -258,7 +294,8 @@ def listar_veiculos():
     return render_template(
         "veiculos.html",
         veiculos=veiculos,
-        clientes=clientes
+        clientes=clientes,
+        pesquisa=pesquisa
     )
 
 
@@ -267,22 +304,18 @@ def cadastrar_veiculo():
     cliente_id = request.form.get("cliente_id", "").strip()
     marca = request.form.get("marca", "").strip()
     modelo = request.form.get("modelo", "").strip()
-    ano_texto = request.form.get("ano", "").strip()
+    ano = request.form.get("ano", "").strip()
     placa = request.form.get("placa", "").strip().upper()
 
-    if not all([cliente_id, marca, modelo, ano_texto, placa]):
-        flash("Preencha todos os campos obrigatórios do veículo.", "erro")
+    if not all([cliente_id, marca, modelo, ano, placa]):
+        flash("Preencha todos os campos do veículo.", "erro")
         return redirect(url_for("listar_veiculos"))
 
     try:
         cliente_id = int(cliente_id)
-        ano = int(ano_texto)
-
-        if ano < 1900 or ano > 2100:
-            raise ValueError
-
+        ano = int(ano)
     except ValueError:
-        flash("Informe um cliente e um ano válidos.", "erro")
+        flash("Cliente e ano devem ser valores válidos.", "erro")
         return redirect(url_for("listar_veiculos"))
 
     cliente = buscar_um(
@@ -291,21 +324,13 @@ def cadastrar_veiculo():
     )
 
     if not cliente:
-        flash("O cliente selecionado não existe.", "erro")
-        return redirect(url_for("listar_veiculos"))
-
-    placa_existente = buscar_um(
-        "SELECT id FROM veiculos WHERE placa = %s",
-        (placa,)
-    )
-
-    if placa_existente:
-        flash("Já existe um veículo cadastrado com essa placa.", "aviso")
+        flash("Selecione um cliente cadastrado.", "erro")
         return redirect(url_for("listar_veiculos"))
 
     sucesso = executar(
         """
-        INSERT INTO veiculos (cliente_id, marca, modelo, ano, placa)
+        INSERT INTO veiculos
+            (cliente_id, marca, modelo, ano, placa)
         VALUES (%s, %s, %s, %s, %s)
         """,
         (cliente_id, marca, modelo, ano, placa)
@@ -314,33 +339,41 @@ def cadastrar_veiculo():
     if sucesso:
         flash("Veículo cadastrado com sucesso!", "sucesso")
     else:
-        flash("Não foi possível cadastrar o veículo.", "erro")
+        flash(
+            "Não foi possível cadastrar o veículo. Verifique se a placa já existe.",
+            "erro"
+        )
 
     return redirect(url_for("listar_veiculos"))
 
 
 @app.route("/veiculos/editar/<int:id>", methods=["GET", "POST"])
 def editar_veiculo(id):
+    veiculo = buscar_um(
+        "SELECT * FROM veiculos WHERE id = %s",
+        (id,)
+    )
+
+    if not veiculo:
+        flash("Veículo não encontrado.", "erro")
+        return redirect(url_for("listar_veiculos"))
+
     if request.method == "POST":
         cliente_id = request.form.get("cliente_id", "").strip()
         marca = request.form.get("marca", "").strip()
         modelo = request.form.get("modelo", "").strip()
-        ano_texto = request.form.get("ano", "").strip()
+        ano = request.form.get("ano", "").strip()
         placa = request.form.get("placa", "").strip().upper()
 
-        if not all([cliente_id, marca, modelo, ano_texto, placa]):
-            flash("Preencha todos os campos obrigatórios.", "erro")
+        if not all([cliente_id, marca, modelo, ano, placa]):
+            flash("Preencha todos os campos do veículo.", "erro")
             return redirect(url_for("editar_veiculo", id=id))
 
         try:
             cliente_id = int(cliente_id)
-            ano = int(ano_texto)
-
-            if ano < 1900 or ano > 2100:
-                raise ValueError
-
+            ano = int(ano)
         except ValueError:
-            flash("Informe um cliente e um ano válidos.", "erro")
+            flash("Cliente e ano devem ser valores válidos.", "erro")
             return redirect(url_for("editar_veiculo", id=id))
 
         cliente = buscar_um(
@@ -349,23 +382,17 @@ def editar_veiculo(id):
         )
 
         if not cliente:
-            flash("O cliente selecionado não existe.", "erro")
-            return redirect(url_for("editar_veiculo", id=id))
-
-        placa_existente = buscar_um(
-            "SELECT id FROM veiculos WHERE placa = %s AND id <> %s",
-            (placa, id)
-        )
-
-        if placa_existente:
-            flash("Essa placa já está cadastrada em outro veículo.", "aviso")
+            flash("Selecione um cliente cadastrado.", "erro")
             return redirect(url_for("editar_veiculo", id=id))
 
         sucesso = executar(
             """
             UPDATE veiculos
-            SET cliente_id = %s, marca = %s, modelo = %s,
-                ano = %s, placa = %s
+            SET cliente_id = %s,
+                marca = %s,
+                modelo = %s,
+                ano = %s,
+                placa = %s
             WHERE id = %s
             """,
             (cliente_id, marca, modelo, ano, placa, id)
@@ -375,20 +402,10 @@ def editar_veiculo(id):
             flash("Veículo atualizado com sucesso!", "sucesso")
             return redirect(url_for("listar_veiculos"))
 
-        flash("Não foi possível atualizar o veículo.", "erro")
-        return redirect(url_for("editar_veiculo", id=id))
-
-    veiculo = buscar_um(
-        """
-        SELECT id, cliente_id, marca, modelo, ano, placa
-        FROM veiculos WHERE id = %s
-        """,
-        (id,)
-    )
-
-    if not veiculo:
-        flash("Veículo não encontrado.", "aviso")
-        return redirect(url_for("listar_veiculos"))
+        flash(
+            "Não foi possível atualizar o veículo. Verifique se a placa já existe.",
+            "erro"
+        )
 
     clientes = buscar_todos(
         "SELECT id, nome FROM clientes ORDER BY nome"
@@ -403,15 +420,29 @@ def editar_veiculo(id):
 
 @app.route("/veiculos/excluir/<int:id>", methods=["POST"])
 def excluir_veiculo(id):
+    veiculo = buscar_um(
+        "SELECT id FROM veiculos WHERE id = %s",
+        (id,)
+    )
+
+    if not veiculo:
+        flash("Veículo não encontrado.", "erro")
+        return redirect(url_for("listar_veiculos"))
+
     ordem = buscar_um(
-        "SELECT id FROM ordens_servico WHERE veiculo_id = %s LIMIT 1",
+        """
+        SELECT id
+        FROM ordens_servico
+        WHERE veiculo_id = %s
+        LIMIT 1
+        """,
         (id,)
     )
 
     if ordem:
         flash(
-            "Não é possível excluir este veículo: existem ordens de serviço vinculadas a ele.",
-            "aviso"
+            "Não é possível excluir este veículo porque ele possui ordens de serviço.",
+            "erro"
         )
         return redirect(url_for("listar_veiculos"))
 
@@ -428,10 +459,9 @@ def excluir_veiculo(id):
     return redirect(url_for("listar_veiculos"))
 
 
-# ==================================================
-# ORDENS DE SERVIÇO
-# ==================================================
-
+# =========================================================
+# ORDENS DE SERVIÇO E PESQUISA POR CLIENTE
+# =========================================================
 
 @app.route("/ordens-servico")
 def listar_ordens():
@@ -448,9 +478,11 @@ def listar_ordens():
             os.data_abertura,
             v.marca,
             v.modelo,
-            v.placa
+            v.placa,
+            c.nome AS cliente
         FROM ordens_servico os
         INNER JOIN veiculos v ON v.id = os.veiculo_id
+        INNER JOIN clientes c ON c.id = v.cliente_id
         WHERE 1 = 1
     """
 
@@ -463,10 +495,12 @@ def listar_ordens():
                 OR v.modelo LIKE %s
                 OR v.marca LIKE %s
                 OR os.descricao LIKE %s
+                OR c.nome LIKE %s
             )
         """
+
         termo = f"%{pesquisa}%"
-        parametros.extend([termo, termo, termo, termo])
+        parametros.extend([termo] * 5)
 
     status_permitidos = {
         "Pendente",
@@ -505,21 +539,21 @@ def listar_ordens():
 def cadastrar_ordem():
     veiculo_id = request.form.get("veiculo_id", "").strip()
     descricao = request.form.get("descricao", "").strip()
-    valor_texto = request.form.get("valor", "").strip().replace(",", ".")
+    valor = request.form.get("valor", "").strip()
 
-    if not all([veiculo_id, descricao, valor_texto]):
-        flash("Preencha todos os campos obrigatórios.", "erro")
+    if not all([veiculo_id, descricao, valor]):
+        flash("Preencha todos os campos da ordem de serviço.", "erro")
         return redirect(url_for("listar_ordens"))
 
     try:
         veiculo_id = int(veiculo_id)
-        valor = float(valor_texto)
-
-        if valor < 0:
-            raise ValueError
-
+        valor = float(valor.replace(",", "."))
     except ValueError:
         flash("Informe um veículo e um valor válidos.", "erro")
+        return redirect(url_for("listar_ordens"))
+
+    if valor < 0:
+        flash("O valor não pode ser negativo.", "erro")
         return redirect(url_for("listar_ordens"))
 
     veiculo = buscar_um(
@@ -528,15 +562,16 @@ def cadastrar_ordem():
     )
 
     if not veiculo:
-        flash("O veículo selecionado não existe.", "erro")
+        flash("Selecione um veículo cadastrado.", "erro")
         return redirect(url_for("listar_ordens"))
 
     sucesso = executar(
         """
-        INSERT INTO ordens_servico (veiculo_id, descricao, valor, status)
-        VALUES (%s, %s, %s, %s)
+        INSERT INTO ordens_servico
+            (veiculo_id, descricao, valor)
+        VALUES (%s, %s, %s)
         """,
-        (veiculo_id, descricao, valor, "Pendente")
+        (veiculo_id, descricao, valor)
     )
 
     if sucesso:
@@ -547,8 +582,11 @@ def cadastrar_ordem():
     return redirect(url_for("listar_ordens"))
 
 
-@app.route("/ordens-servico/atualizar-status/<int:id>", methods=["POST"])
-def atualizar_status(id):
+@app.route(
+    "/ordens-servico/atualizar-status/<int:id>",
+    methods=["POST"]
+)
+def atualizar_status_ordem(id):
     status = request.form.get("status", "").strip()
 
     status_permitidos = {
@@ -567,16 +605,20 @@ def atualizar_status(id):
     )
 
     if not ordem:
-        flash("Ordem de serviço não encontrada.", "aviso")
+        flash("Ordem de serviço não encontrada.", "erro")
         return redirect(url_for("listar_ordens"))
 
     sucesso = executar(
-        "UPDATE ordens_servico SET status = %s WHERE id = %s",
+        """
+        UPDATE ordens_servico
+        SET status = %s
+        WHERE id = %s
+        """,
         (status, id)
     )
 
     if sucesso:
-        flash("Status atualizado com sucesso!", "sucesso")
+        flash("Status da ordem atualizado com sucesso!", "sucesso")
     else:
         flash("Não foi possível atualizar o status.", "erro")
 
@@ -591,13 +633,13 @@ def excluir_ordem(id):
     )
 
     if not ordem:
-        flash("Ordem de serviço não encontrada.", "aviso")
+        flash("Ordem de serviço não encontrada.", "erro")
         return redirect(url_for("listar_ordens"))
 
     if ordem["status"] != "Concluída":
         flash(
             "Somente ordens de serviço concluídas podem ser excluídas.",
-            "aviso"
+            "erro"
         )
         return redirect(url_for("listar_ordens"))
 
@@ -614,9 +656,9 @@ def excluir_ordem(id):
     return redirect(url_for("listar_ordens"))
 
 
-# ==================================================
-# EXECUÇÃO
-# ==================================================
+# =========================================================
+# INICIALIZAÇÃO
+# =========================================================
 
 if __name__ == "__main__":
     app.run(debug=True)

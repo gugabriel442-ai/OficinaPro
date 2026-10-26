@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>OficinaPro | Veículos</title>
 
     <link rel="stylesheet"
@@ -40,10 +41,11 @@
         <!-- CONTEÚDO PRINCIPAL -->
         <main class="conteudo">
 
+            <!-- CABEÇALHO -->
             <header class="cabecalho">
                 <div>
                     <h1>Veículos</h1>
-                    <p>Cadastre e gerencie os veículos dos clientes.</p>
+                    <p>Cadastre, pesquise e gerencie os veículos dos clientes.</p>
                 </div>
             </header>
 
@@ -58,7 +60,7 @@
                 {% endif %}
             {% endwith %}
 
-            <!-- FORMULÁRIO DE CADASTRO -->
+            <!-- CADASTRO DE VEÍCULOS -->
             <section class="painel">
                 <h2>Cadastrar veículo</h2>
 
@@ -150,9 +152,42 @@
             </section>
 
             <!-- LISTAGEM DE VEÍCULOS -->
-            <section class="painel">
+            <section class="painel" id="veiculos">
                 <h2>Veículos cadastrados</h2>
 
+                <!-- PESQUISA -->
+                <form
+                    action="{{ url_for('listar_veiculos') }}#veiculos"
+                    method="GET"
+                    class="filtros-ordens"
+                >
+                    <div class="campo">
+                        <label for="pesquisa">Pesquisar veículo</label>
+
+                        <input
+                            type="text"
+                            id="pesquisa"
+                            name="pesquisa"
+                            value="{{ pesquisa }}"
+                            placeholder="Placa, marca ou modelo..."
+                        >
+                    </div>
+
+                    <div class="botoes">
+                        <button type="submit">
+                            Pesquisar
+                        </button>
+
+                        <a
+                            href="{{ url_for('listar_veiculos') }}#veiculos"
+                            class="botao-voltar"
+                        >
+                            Limpar
+                        </a>
+                    </div>
+                </form>
+
+                <!-- TABELA -->
                 <div class="tabela-container">
                     <table>
                         <thead>
@@ -177,7 +212,7 @@
                                     <td>{{ veiculo.ano }}</td>
                                     <td>{{ veiculo.placa }}</td>
 
-                                    <!-- AÇÕES LADO A LADO -->
+                                    <!-- EDITAR E EXCLUIR LADO A LADO -->
                                     <td>
                                         <div class="acoes">
 
@@ -208,7 +243,11 @@
                             {% else %}
                                 <tr>
                                     <td colspan="7" class="vazio">
-                                        Nenhum veículo cadastrado ainda.
+                                        {% if pesquisa %}
+                                            Nenhum veículo encontrado para essa pesquisa.
+                                        {% else %}
+                                            Nenhum veículo cadastrado ainda.
+                                        {% endif %}
                                     </td>
                                 </tr>
                             {% endfor %}
