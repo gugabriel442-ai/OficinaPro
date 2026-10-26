@@ -594,3 +594,64 @@ tbody tr:hover {
         grid-template-columns: 1fr;
     }
 }
+
+/* Atalhos do dashboard */
+.atalhos-dashboard {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.atalho-dashboard {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    padding: 16px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--text);
+    text-decoration: none;
+    transition: border-color 0.15s, background 0.15s;
+}
+
+.atalho-dashboard:hover {
+    border-color: #bfdbfe;
+    background: #f8fbff;
+}
+
+.atalho-icone {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    border-radius: 7px;
+    background: #eff6ff;
+    color: var(--primary);
+    font-size: 23px;
+}
+
+.atalho-dashboard strong,
+.atalho-dashboard small {
+    display: block;
+}
+
+.atalho-dashboard strong {
+    margin-bottom: 3px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.atalho-dashboard small {
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+@media (max-width: 900px) {
+    .atalhos-dashboard {
+        grid-template-columns: 1fr;
+    }
+}

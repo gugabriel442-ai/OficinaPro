@@ -179,6 +179,41 @@
             <section class="painel" id="clientes">
                 <h2>Clientes cadastrados</h2>
 
+                <!-- PESQUISA DE CLIENTES -->
+                <form
+                    action="{{ url_for('inicio') }}#clientes"
+                    method="GET"
+                    class="filtros-ordens"
+                >
+                    <div class="campo">
+                        <label for="pesquisa_cliente">
+                            Pesquisar cliente
+                        </label>
+
+                        <input
+                            type="text"
+                            id="pesquisa_cliente"
+                            name="pesquisa_cliente"
+                            value="{{ pesquisa_cliente }}"
+                            placeholder="Nome, telefone ou e-mail..."
+                        >
+                    </div>
+
+                    <div class="botoes">
+                        <button type="submit">
+                            Pesquisar
+                        </button>
+
+                        <a
+                            href="{{ url_for('inicio') }}#clientes"
+                            class="botao-voltar"
+                        >
+                            Limpar
+                        </a>
+                    </div>
+                </form>
+
+                <!-- TABELA DE CLIENTES -->
                 <div class="tabela-container">
                     <table>
                         <thead>
@@ -229,7 +264,11 @@
                             {% else %}
                                 <tr>
                                     <td colspan="5" class="vazio">
-                                        Nenhum cliente cadastrado ainda.
+                                        {% if pesquisa_cliente %}
+                                            Nenhum cliente encontrado para essa pesquisa.
+                                        {% else %}
+                                            Nenhum cliente cadastrado ainda.
+                                        {% endif %}
                                     </td>
                                 </tr>
                             {% endfor %}

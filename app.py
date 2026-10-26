@@ -81,8 +81,11 @@ def executar(sql, parametros=()):
 # DASHBOARD
 # ==================================================
 
+
 @app.route("/")
 def inicio():
+    pesquisa_cliente = request.args.get("pesquisa_cliente", "").strip()
+
     total_clientes = buscar_um(
         "SELECT COUNT(*) AS total FROM clientes"
     )
@@ -103,9 +106,20 @@ def inicio():
         ("Concluída",)
     )
 
+    sql_clientes = """
+        SELECT id, nome, telefone, email
+        FROM clientes
+        WHERE nome LIKE %s
+           OR telefone LIKE %s
+           OR email LIKE %s
+        ORDER BY id DESC
+    """
+
+    termo = f"%{pesquisa_cliente}%"
+
     clientes = buscar_todos(
-        "SELECT id, nome, telefone, email "
-        "FROM clientes ORDER BY id DESC"
+        sql_clientes,
+        (termo, termo, termo)
     )
 
     return render_template(
@@ -114,9 +128,9 @@ def inicio():
         total_veiculos=total_veiculos["total"] if total_veiculos else 0,
         ordens_pendentes=ordens_pendentes["total"] if ordens_pendentes else 0,
         ordens_concluidas=ordens_concluidas["total"] if ordens_concluidas else 0,
-        clientes=clientes
+        clientes=clientes,
+        pesquisa_cliente=pesquisa_cliente
     )
-
 
 # ==================================================
 # CLIENTES
