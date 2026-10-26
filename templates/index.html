@@ -1,0 +1,196 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OficinaPro | Dashboard</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="layout">
+
+        <!-- MENU LATERAL -->
+        <aside class="sidebar">
+            <h2>OficinaPro</h2>
+            <p class="subtitulo">Sistema de gestão de oficina</p>
+
+            <nav>
+                <a href="{{ url_for('inicio') }}" class="ativo">
+                    Dashboard
+                </a>
+
+                <a href="{{ url_for('inicio') }}#clientes">
+                    Clientes
+                </a>
+
+                <a href="{{ url_for('listar_veiculos') }}">
+                    Veículos
+                </a>
+
+                <a href="{{ url_for('listar_ordens') }}">
+                    Ordens de serviço
+                </a>
+            </nav>
+        </aside>
+
+        <!-- CONTEÚDO PRINCIPAL -->
+        <main class="conteudo">
+
+            <header class="cabecalho">
+                <div>
+                    <h1>Dashboard</h1>
+                    <p>Visão geral da sua oficina</p>
+                </div>
+            </header>
+
+            <!-- MENSAGENS DO FLASK -->
+            {% with mensagens = get_flashed_messages(with_categories=true) %}
+                {% if mensagens %}
+                    {% for categoria, mensagem in mensagens %}
+                        <div class="mensagem {{ categoria }}">
+                            {{ mensagem }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- INDICADORES -->
+            <section class="indicadores">
+
+                <div class="cartao-indicador">
+                    <h3>Total de clientes</h3>
+                    <p>{{ total_clientes }}</p>
+                </div>
+
+                <div class="cartao-indicador">
+                    <h3>Veículos cadastrados</h3>
+                    <p>{{ total_veiculos }}</p>
+                </div>
+
+                <div class="cartao-indicador">
+                    <h3>Ordens pendentes</h3>
+                    <p>{{ ordens_pendentes }}</p>
+                </div>
+
+                <div class="cartao-indicador">
+                    <h3>Ordens concluídas</h3>
+                    <p>{{ ordens_concluidas }}</p>
+                </div>
+
+            </section>
+
+            <!-- CADASTRO DE CLIENTES -->
+            <section class="painel" id="clientes">
+                <h2>Cadastrar cliente</h2>
+
+                <form
+                    action="{{ url_for('cadastrar_cliente') }}"
+                    method="POST"
+                >
+                    <label for="nome">Nome completo *</label>
+                    <input
+                        type="text"
+                        id="nome"
+                        name="nome"
+                        maxlength="100"
+                        placeholder="Digite o nome do cliente"
+                        required
+                    >
+
+                    <label for="telefone">Telefone</label>
+                    <input
+                        type="text"
+                        id="telefone"
+                        name="telefone"
+                        maxlength="20"
+                        placeholder="(47) 99999-9999"
+                    >
+
+                    <label for="email">E-mail</label>
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        maxlength="100"
+                        placeholder="cliente@email.com"
+                    >
+
+                    <button type="submit">
+                        Cadastrar cliente
+                    </button>
+                </form>
+            </section>
+
+            <!-- LISTAGEM DE CLIENTES -->
+            <section class="painel">
+                <h2>Clientes cadastrados</h2>
+
+                <div class="tabela-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nome</th>
+                                <th>Telefone</th>
+                                <th>E-mail</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for cliente in clientes %}
+                                <tr>
+                                    <td>{{ cliente.id }}</td>
+                                    <td>{{ cliente.nome }}</td>
+                                    <td>{{ cliente.telefone or '-' }}</td>
+                                    <td>{{ cliente.email or '-' }}</td>
+
+                                    <td>
+                                        <div class="acoes">
+                                            <a
+                                                class="botao-editar"
+                                                href="{{ url_for('editar_cliente', id=cliente.id) }}"
+                                            >
+                                                Editar
+                                            </a>
+
+                                            <form
+                                                action="{{ url_for('excluir_cliente', id=cliente.id) }}"
+                                                method="POST"
+                                                onsubmit="return confirm('Deseja realmente excluir este cliente?');"
+                                            >
+                                                <button
+                                                    type="submit"
+                                                    class="botao-excluir"
+                                                >
+                                                    Excluir
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="5" class="vazio">
+                                        Nenhum cliente cadastrado ainda.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- RODAPÉ -->
+            <footer class="rodape">
+                OficinaPro — Sistema de gestão de oficina
+            </footer>
+
+        </main>
+    </div>
+</body>
+</html>

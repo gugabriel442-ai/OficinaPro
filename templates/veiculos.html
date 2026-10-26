@@ -1,0 +1,228 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OficinaPro | Veículos</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="layout">
+
+        <!-- MENU LATERAL -->
+        <aside class="sidebar">
+            <h2>OficinaPro</h2>
+            <p class="subtitulo">Sistema de gestão de oficina</p>
+
+            <nav>
+                <a href="{{ url_for('inicio') }}">
+                    Dashboard
+                </a>
+
+                <a href="{{ url_for('inicio') }}#clientes">
+                    Clientes
+                </a>
+
+                <a href="{{ url_for('listar_veiculos') }}" class="ativo">
+                    Veículos
+                </a>
+
+                <a href="{{ url_for('listar_ordens') }}">
+                    Ordens de serviço
+                </a>
+            </nav>
+        </aside>
+
+        <!-- CONTEÚDO PRINCIPAL -->
+        <main class="conteudo">
+
+            <header class="cabecalho">
+                <div>
+                    <h1>Veículos</h1>
+                    <p>Cadastre e gerencie os veículos dos clientes.</p>
+                </div>
+            </header>
+
+            <!-- MENSAGENS DO FLASK -->
+            {% with mensagens = get_flashed_messages(with_categories=true) %}
+                {% if mensagens %}
+                    {% for categoria, mensagem in mensagens %}
+                        <div class="mensagem {{ categoria }}">
+                            {{ mensagem }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- FORMULÁRIO DE CADASTRO -->
+            <section class="painel">
+                <h2>Cadastrar veículo</h2>
+
+                <form
+                    action="{{ url_for('cadastrar_veiculo') }}"
+                    method="POST"
+                >
+                    <div class="formulario">
+
+                        <div class="campo">
+                            <label for="cliente_id">Cliente *</label>
+
+                            <select
+                                name="cliente_id"
+                                id="cliente_id"
+                                required
+                            >
+                                <option value="">Selecione um cliente</option>
+
+                                {% for cliente in clientes %}
+                                    <option value="{{ cliente.id }}">
+                                        {{ cliente.nome }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="campo">
+                            <label for="marca">Marca *</label>
+
+                            <input
+                                type="text"
+                                id="marca"
+                                name="marca"
+                                maxlength="50"
+                                placeholder="Ex.: Toyota"
+                                required
+                            >
+                        </div>
+
+                        <div class="campo">
+                            <label for="modelo">Modelo *</label>
+
+                            <input
+                                type="text"
+                                id="modelo"
+                                name="modelo"
+                                maxlength="50"
+                                placeholder="Ex.: Corolla"
+                                required
+                            >
+                        </div>
+
+                        <div class="campo">
+                            <label for="ano">Ano *</label>
+
+                            <input
+                                type="number"
+                                id="ano"
+                                name="ano"
+                                min="1900"
+                                max="2100"
+                                placeholder="Ex.: 2022"
+                                required
+                            >
+                        </div>
+
+                        <div class="campo">
+                            <label for="placa">Placa *</label>
+
+                            <input
+                                type="text"
+                                id="placa"
+                                name="placa"
+                                maxlength="10"
+                                placeholder="Ex.: ABC1D23"
+                                required
+                            >
+                        </div>
+
+                    </div>
+
+                    <div class="botoes">
+                        <button type="submit">
+                            Cadastrar veículo
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- LISTAGEM DE VEÍCULOS -->
+            <section class="painel">
+                <h2>Veículos cadastrados</h2>
+
+                <div class="tabela-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Cliente</th>
+                                <th>Marca</th>
+                                <th>Modelo</th>
+                                <th>Ano</th>
+                                <th>Placa</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for veiculo in veiculos %}
+                                <tr>
+                                    <td>{{ veiculo.id }}</td>
+                                    <td>{{ veiculo.cliente }}</td>
+                                    <td>{{ veiculo.marca }}</td>
+                                    <td>{{ veiculo.modelo }}</td>
+                                    <td>{{ veiculo.ano }}</td>
+                                    <td>{{ veiculo.placa }}</td>
+
+                                    <!-- AÇÕES LADO A LADO -->
+                                    <td>
+                                        <div class="acoes">
+
+                                            <a
+                                                class="botao-editar"
+                                                href="{{ url_for('editar_veiculo', id=veiculo.id) }}"
+                                            >
+                                                Editar
+                                            </a>
+
+                                            <form
+                                                action="{{ url_for('excluir_veiculo', id=veiculo.id) }}"
+                                                method="POST"
+                                                onsubmit="return confirm('Deseja realmente excluir este veículo?');"
+                                            >
+                                                <button
+                                                    type="submit"
+                                                    class="botao-excluir"
+                                                >
+                                                    Excluir
+                                                </button>
+                                            </form>
+
+                                        </div>
+                                    </td>
+                                </tr>
+
+                            {% else %}
+                                <tr>
+                                    <td colspan="7" class="vazio">
+                                        Nenhum veículo cadastrado ainda.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- RODAPÉ -->
+            <footer class="rodape">
+                OficinaPro — Sistema de gestão de oficina
+            </footer>
+
+        </main>
+    </div>
+</body>
+</html>
