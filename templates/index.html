@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>OficinaPro | Dashboard</title>
 
     <link rel="stylesheet"
@@ -40,6 +41,7 @@
         <!-- CONTEÚDO PRINCIPAL -->
         <main class="conteudo">
 
+            <!-- CABEÇALHO -->
             <header class="cabecalho">
                 <div>
                     <h1>Dashboard</h1>
@@ -57,6 +59,51 @@
                     {% endfor %}
                 {% endif %}
             {% endwith %}
+
+            <!-- ATALHOS DE ACESSO RÁPIDO -->
+            <section class="painel">
+                <h2>Acesso rápido</h2>
+
+                <div class="atalhos-dashboard">
+
+                    <a
+                        href="{{ url_for('inicio') }}#cadastro-cliente"
+                        class="atalho-dashboard"
+                    >
+                        <span class="atalho-icone">＋</span>
+
+                        <span>
+                            <strong>Cadastrar cliente</strong>
+                            <small>Adicionar um novo cliente</small>
+                        </span>
+                    </a>
+
+                    <a
+                        href="{{ url_for('listar_veiculos') }}"
+                        class="atalho-dashboard"
+                    >
+                        <span class="atalho-icone">＋</span>
+
+                        <span>
+                            <strong>Cadastrar veículo</strong>
+                            <small>Registrar um veículo</small>
+                        </span>
+                    </a>
+
+                    <a
+                        href="{{ url_for('listar_ordens') }}"
+                        class="atalho-dashboard"
+                    >
+                        <span class="atalho-icone">＋</span>
+
+                        <span>
+                            <strong>Nova ordem de serviço</strong>
+                            <small>Registrar um serviço</small>
+                        </span>
+                    </a>
+
+                </div>
+            </section>
 
             <!-- INDICADORES -->
             <section class="indicadores">
@@ -84,7 +131,7 @@
             </section>
 
             <!-- CADASTRO DE CLIENTES -->
-            <section class="painel" id="clientes">
+            <section class="painel" id="cadastro-cliente">
                 <h2>Cadastrar cliente</h2>
 
                 <form
@@ -92,6 +139,7 @@
                     method="POST"
                 >
                     <label for="nome">Nome completo *</label>
+
                     <input
                         type="text"
                         id="nome"
@@ -102,6 +150,7 @@
                     >
 
                     <label for="telefone">Telefone</label>
+
                     <input
                         type="text"
                         id="telefone"
@@ -111,6 +160,7 @@
                     >
 
                     <label for="email">E-mail</label>
+
                     <input
                         type="email"
                         id="email"
@@ -126,7 +176,7 @@
             </section>
 
             <!-- LISTAGEM DE CLIENTES -->
-            <section class="painel">
+            <section class="painel" id="clientes">
                 <h2>Clientes cadastrados</h2>
 
                 <div class="tabela-container">
@@ -151,6 +201,7 @@
 
                                     <td>
                                         <div class="acoes">
+
                                             <a
                                                 class="botao-editar"
                                                 href="{{ url_for('editar_cliente', id=cliente.id) }}"
@@ -170,9 +221,11 @@
                                                     Excluir
                                                 </button>
                                             </form>
+
                                         </div>
                                     </td>
                                 </tr>
+
                             {% else %}
                                 <tr>
                                     <td colspan="5" class="vazio">
