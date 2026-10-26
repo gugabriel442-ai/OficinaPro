@@ -1,109 +1,154 @@
 # OficinaPro — Sistema de Gestão de Oficina
 
-Sistema web desenvolvido para facilitar o gerenciamento de uma oficina mecânica, permitindo organizar clientes, veículos e ordens de serviço em uma única aplicação.
+Sistema web para gerenciamento de oficinas mecânicas, desenvolvido com Python, Flask e MySQL. O projeto permite organizar clientes, veículos e ordens de serviço em uma interface simples e minimalista.
 
 ## Sobre o projeto
 
-O OficinaPro é um projeto de portfólio desenvolvido para praticar programação back-end, integração com banco de dados e desenvolvimento de interfaces web.
+O OficinaPro é um projeto de portfólio criado para praticar desenvolvimento web, programação back-end, integração com banco de dados relacionais e controle de versão com Git e GitHub.
 
 ## Funcionalidades
 
-- **Dashboard:** visualização de indicadores de clientes, veículos e ordens de serviço.
-- **Clientes:** cadastro, consulta, edição e exclusão.
-- **Veículos:** cadastro, consulta, edição e exclusão, com vínculo aos clientes.
-- **Ordens de serviço:** cadastro de serviços, descrição e valor.
-- **Controle de status:** acompanhamento de serviços pendentes, em andamento e concluídos.
-- **Pesquisa e filtros:** busca de ordens por placa, marca, modelo ou descrição e filtragem por status.
-- **Exclusão de ordens:** permitida somente para serviços concluídos.
-- **Interface responsiva:** layout minimalista para facilitar a utilização.
+### Dashboard
+- Visualização de indicadores de clientes, veículos e ordens de serviço.
+- Atalhos para acessar as principais áreas do sistema.
+- Listagem e pesquisa de clientes.
+
+### Clientes
+- Cadastro de clientes.
+- Consulta e pesquisa por nome, telefone ou e-mail.
+- Edição e exclusão de registros.
+- Proteção contra exclusão de clientes que possuem veículos cadastrados.
+
+### Veículos
+- Cadastro de veículos vinculados a clientes.
+- Consulta e pesquisa por placa, marca ou modelo.
+- Edição e exclusão de registros.
+- Proteção contra exclusão de veículos vinculados a ordens de serviço.
+
+### Ordens de serviço
+- Cadastro de ordens com veículo, descrição e valor.
+- Consulta dos dados do cliente e do veículo relacionado.
+- Pesquisa por nome do cliente, placa, marca, modelo ou descrição do serviço.
+- Filtro por status.
+- Atualização do status: Pendente, Em andamento ou Concluída.
+- Página com detalhes completos da ordem de serviço.
+- Exclusão permitida somente para ordens concluídas.
 
 ## Tecnologias utilizadas
 
-- Python
-- Flask
-- MySQL
-- HTML5
-- CSS3
-- Git e GitHub
+- **Python:** lógica e processamento da aplicação.
+- **Flask:** desenvolvimento da aplicação web.
+- **MySQL:** armazenamento e gerenciamento dos dados.
+- **HTML5:** estrutura das páginas.
+- **CSS3:** estilização e responsividade.
+- **Git:** controle de versão.
+- **GitHub:** hospedagem do código-fonte.
 
 ## Estrutura do projeto
 
 ```text
 sistema-oficina/
-├── app.py
-├── database.py
-├── requirements.txt
-├── .gitignore
-├── README.md
 ├── static/
 │   └── style.css
-└── templates/
-    ├── index.html
-    ├── editar_cliente.html
-    ├── editar_veiculo.html
-    ├── veiculos.html
-    └── ordens_servico.html
+├── templates/
+│   ├── detalhes_ordem.html
+│   ├── editar_cliente.html
+│   ├── editar_veiculo.html
+│   ├── index.html
+│   ├── ordens_servico.html
+│   └── veiculos.html
+├── .env
+├── .gitignore
+├── app.py
+├── database.py
+├── database.sql
+├── README.md
+└── requirements.txt
 ```
+
+O ambiente virtual `.venv/` e a pasta `__pycache__/` são locais e não precisam ser publicados no repositório.
 
 ## Como executar o projeto
 
 ### 1. Pré-requisitos
 
-- Python instalado
-- MySQL instalado
-- Git instalado
+Antes de começar, instale:
 
-### 2. Clone o repositório
+- Python 3.
+- MySQL Server.
+- MySQL Workbench (opcional, recomendado para administrar o banco).
+- Git.
+
+### 2. Clonar o repositório
 
 ```bash
 git clone https://github.com/gugabriel442-ai/OficinaPro.git
 cd OficinaPro
 ```
 
-### 3. Crie e ative o ambiente virtual
+### 3. Criar o ambiente virtual
 
-No Windows, usando PowerShell:
+No Windows, utilizando PowerShell:
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
 
-### 4. Instale as dependências
+### 4. Instalar as dependências
+
+Com o ambiente virtual ativado:
 
 ```bash
 python -m pip install -r requirements.txt
 ```
 
-### 5. Configure o banco de dados
+### 5. Configurar o banco de dados
 
-Crie o banco `oficina_db` no MySQL e configure as tabelas necessárias.
+Abra o MySQL Workbench, conecte-se ao seu servidor MySQL e execute o conteúdo do arquivo `database.sql`.
 
-Configure também o arquivo `.env` na raiz do projeto, utilizando as credenciais do seu próprio ambiente:
+O script cria o banco de dados e as tabelas necessárias para o funcionamento do sistema.
 
-```dotenv
+### 6. Configurar as variáveis de ambiente
+
+Crie um arquivo `.env` na raiz do projeto, no mesmo nível de `app.py` e `database.py`.
+
+Configure as credenciais do seu próprio ambiente:
+
+```env
 DB_HOST=localhost
 DB_USER=seu_usuario
 DB_PASSWORD=sua_senha
 DB_NAME=oficina_db
 ```
 
-Não publique o arquivo `.env` nem suas credenciais no GitHub.
+Substitua `seu_usuario` e `sua_senha` pelas credenciais válidas do MySQL.
 
-### 6. Execute a aplicação
+**Importante:** nunca publique o arquivo `.env` nem compartilhe suas credenciais. O arquivo deve estar listado no `.gitignore`.
+
+### 7. Executar a aplicação
+
+No terminal, com o ambiente virtual ativado, execute:
 
 ```bash
 python app.py
 ```
 
-Acesse no navegador o endereço local informado pelo Flask, normalmente:
+Abra o navegador no endereço:
 
 http://127.0.0.1:5000
 
+## Segurança e boas práticas
+
+- Credenciais do banco de dados armazenadas em variáveis de ambiente.
+- Consultas SQL parametrizadas para operações com dados fornecidos pelo usuário.
+- Uso de Git para acompanhar alterações no código.
+- Arquivos locais e credenciais excluídos do versionamento por meio do `.gitignore`.
+
 ## Objetivo de aprendizagem
 
-Este projeto tem como objetivo desenvolver conhecimentos práticos em Python, desenvolvimento web com Flask, operações CRUD, consultas SQL, integração com MySQL e controle de versão com Git e GitHub.
+O projeto tem como objetivo desenvolver conhecimentos práticos em Python, Flask, operações CRUD, consultas SQL, integração com MySQL, desenvolvimento de interfaces web e controle de versão com Git e GitHub.
 
 ## Autor
 
-Desenvolvido como projeto de portfólio para evolução profissional na área de Tecnologia da Informação.
+Projeto desenvolvido para portfólio profissional e evolução na área de Tecnologia da Informação.
