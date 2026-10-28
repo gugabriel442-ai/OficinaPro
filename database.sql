@@ -3,9 +3,7 @@
 -- OficinaPro - Banco de dados
 -- =========================================
 
-CREATE DATABASE IF NOT EXISTS oficina_db;
-
-USE oficina_db;
+USE defaultdb;
 
 -- =========================================
 -- TABELA DE CLIENTES
