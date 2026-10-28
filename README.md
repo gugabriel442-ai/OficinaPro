@@ -1,53 +1,40 @@
-# OficinaPro — Sistema de Gestão de Oficina
+# OficinaPro — Sistema de Gestão para Oficinas Mecânicas
 
-Sistema web para gerenciamento de oficinas mecânicas, desenvolvido com Python, Flask e MySQL. O projeto permite organizar clientes, veículos e ordens de serviço em uma interface simples e minimalista.
+O **OficinaPro** é uma aplicação web desenvolvida para facilitar o gerenciamento de oficinas mecânicas. O sistema permite administrar clientes, veículos e ordens de serviço por meio de uma interface web simples e intuitiva.
 
-## Sobre o projeto
+## 🌐 Aplicação online
 
-O OficinaPro é um projeto de portfólio criado para praticar desenvolvimento web, programação back-end, integração com banco de dados relacionais e controle de versão com Git e GitHub.
+**Acesse o sistema:** https://oficinapro-nwi1.onrender.com
 
-## Funcionalidades
+## ✨ Funcionalidades
 
-### Dashboard
-- Visualização de indicadores de clientes, veículos e ordens de serviço.
-- Atalhos para acessar as principais áreas do sistema.
-- Listagem e pesquisa de clientes.
+- Cadastro e gerenciamento de clientes.
+- Consulta, edição e exclusão de clientes.
+- Cadastro e gerenciamento de veículos.
+- Edição e exclusão de veículos.
+- Criação e gerenciamento de ordens de serviço.
+- Atualização do status das ordens de serviço.
+- Pesquisa e filtros para localizar registros.
+- Visualização dos detalhes das ordens de serviço.
+- Integração com banco de dados MySQL.
 
-### Clientes
-- Cadastro de clientes.
-- Consulta e pesquisa por nome, telefone ou e-mail.
-- Edição e exclusão de registros.
-- Proteção contra exclusão de clientes que possuem veículos cadastrados.
+## 🛠️ Tecnologias utilizadas
 
-### Veículos
-- Cadastro de veículos vinculados a clientes.
-- Consulta e pesquisa por placa, marca ou modelo.
-- Edição e exclusão de registros.
-- Proteção contra exclusão de veículos vinculados a ordens de serviço.
+- **Python** — lógica e processamento da aplicação.
+- **Flask** — framework para desenvolvimento web.
+- **MySQL** — banco de dados relacional.
+- **HTML** — estrutura das páginas.
+- **CSS** — estilização da interface.
+- **Git e GitHub** — versionamento e gerenciamento do código-fonte.
+- **Render** — hospedagem da aplicação web.
+- **Aiven** — hospedagem do banco de dados MySQL.
 
-### Ordens de serviço
-- Cadastro de ordens com veículo, descrição e valor.
-- Consulta dos dados do cliente e do veículo relacionado.
-- Pesquisa por nome do cliente, placa, marca, modelo ou descrição do serviço.
-- Filtro por status.
-- Atualização do status: Pendente, Em andamento ou Concluída.
-- Página com detalhes completos da ordem de serviço.
-- Exclusão permitida somente para ordens concluídas.
-
-## Tecnologias utilizadas
-
-- **Python:** lógica e processamento da aplicação.
-- **Flask:** desenvolvimento da aplicação web.
-- **MySQL:** armazenamento e gerenciamento dos dados.
-- **HTML5:** estrutura das páginas.
-- **CSS3:** estilização e responsividade.
-- **Git:** controle de versão.
-- **GitHub:** hospedagem do código-fonte.
-
-## Estrutura do projeto
+## 📂 Estrutura do projeto
 
 ```text
 sistema-oficina/
+├── certificados/
+│   └── ca.pem
 ├── static/
 │   └── style.css
 ├── templates/
@@ -66,89 +53,74 @@ sistema-oficina/
 └── requirements.txt
 ```
 
-O ambiente virtual `.venv/` e a pasta `__pycache__/` são locais e não precisam ser publicados no repositório.
+**Observação:** os diretórios `.venv` e `__pycache__` foram omitidos da estrutura acima porque são arquivos locais de ambiente e execução.
 
-## Como executar o projeto
+## ⚙️ Como executar localmente
 
-### 1. Pré-requisitos
-
-Antes de começar, instale:
-
-- Python 3.
-- MySQL Server.
-- MySQL Workbench (opcional, recomendado para administrar o banco).
-- Git.
-
-### 2. Clonar o repositório
+### 1. Clonar o repositório
 
 ```bash
 git clone https://github.com/gugabriel442-ai/OficinaPro.git
 cd OficinaPro
 ```
 
-### 3. Criar o ambiente virtual
-
-No Windows, utilizando PowerShell:
-
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-```
-
-### 4. Instalar as dependências
-
-Com o ambiente virtual ativado:
+### 2. Criar um ambiente virtual
 
 ```bash
-python -m pip install -r requirements.txt
+python -m venv .venv
 ```
 
-### 5. Configurar o banco de dados
+No Windows PowerShell, ative-o com:
 
-Abra o MySQL Workbench, conecte-se ao seu servidor MySQL e execute o conteúdo do arquivo `database.sql`.
+```powershell
+.venv\Scripts\Activate.ps1
+```
 
-O script cria o banco de dados e as tabelas necessárias para o funcionamento do sistema.
+### 3. Instalar as dependências
 
-### 6. Configurar as variáveis de ambiente
+```bash
+pip install -r requirements.txt
+```
 
-Crie um arquivo `.env` na raiz do projeto, no mesmo nível de `app.py` e `database.py`.
+### 4. Configurar as variáveis de ambiente
 
-Configure as credenciais do seu próprio ambiente:
+Crie um arquivo `.env` na raiz do projeto com as configurações do banco de dados:
 
 ```env
-DB_HOST=localhost
+DB_HOST=seu_host
+DB_PORT=sua_porta
 DB_USER=seu_usuario
 DB_PASSWORD=sua_senha
-DB_NAME=oficina_db
+DB_NAME=seu_banco
 ```
 
-Substitua `seu_usuario` e `sua_senha` pelas credenciais válidas do MySQL.
+Substitua os valores pelos dados da sua instância MySQL. Não publique o arquivo `.env` nem compartilhe suas credenciais.
 
-**Importante:** nunca publique o arquivo `.env` nem compartilhe suas credenciais. O arquivo deve estar listado no `.gitignore`.
+### 5. Preparar o banco de dados
 
-### 7. Executar a aplicação
+Execute o script `database.sql` em uma instância MySQL compatível, verificando previamente o nome do banco de dados utilizado.
 
-No terminal, com o ambiente virtual ativado, execute:
+### 6. Executar a aplicação
 
 ```bash
 python app.py
 ```
 
-Abra o navegador no endereço:
+Acesse o endereço local indicado pelo Flask no terminal.
 
-http://127.0.0.1:5000
+## ☁️ Hospedagem
 
-## Segurança e boas práticas
+A aplicação está publicada no Render e utiliza um banco de dados MySQL hospedado no Aiven.
 
-- Credenciais do banco de dados armazenadas em variáveis de ambiente.
-- Consultas SQL parametrizadas para operações com dados fornecidos pelo usuário.
-- Uso de Git para acompanhar alterações no código.
-- Arquivos locais e credenciais excluídos do versionamento por meio do `.gitignore`.
+- **Aplicação:** https://oficinapro-nwi1.onrender.com
+- **Código-fonte:** https://github.com/gugabriel442-ai/OficinaPro
 
-## Objetivo de aprendizagem
+As credenciais e configurações de produção são definidas por variáveis de ambiente no serviço de hospedagem.
 
-O projeto tem como objetivo desenvolver conhecimentos práticos em Python, Flask, operações CRUD, consultas SQL, integração com MySQL, desenvolvimento de interfaces web e controle de versão com Git e GitHub.
+## 🎯 Objetivo do projeto
 
-## Autor
+Este projeto foi desenvolvido para praticar e consolidar conhecimentos em programação Python, desenvolvimento web com Flask, integração com bancos de dados relacionais, versionamento com Git e GitHub e publicação de aplicações na nuvem.
 
-Projeto desenvolvido para portfólio profissional e evolução na área de Tecnologia da Informação.
+## 👨‍💻 Autor
+
+GitHub: [gugabriel442-ai](https://github.com/gugabriel442-ai)
